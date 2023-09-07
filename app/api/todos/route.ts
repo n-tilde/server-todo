@@ -42,3 +42,44 @@ export const POST = async (req: NextRequest) => {
 
   return new Response("OK", { status: 200 });
 };
+
+export const PATCH = async (req: NextRequest) => {
+  const b = await req.json();
+  console.log(b);
+  if (!db) {
+    db = await open({
+      filename: "./db/database.db",
+      driver: sqlite3.Database,
+    });
+  }
+
+  const query = `
+    UPDATE todos
+    SET finished=?
+    WHERE id=?
+  `;
+
+  await db.all(query, [b.finished ? "1" : "0", b.id]);
+
+  return new Response("OK", { status: 200 });
+};
+
+export const DELETE = async (req: NextRequest) => {
+  const b = await req.json();
+
+  if (!db) {
+    db = await open({
+      filename: "./db/database.db",
+      driver: sqlite3.Database,
+    });
+  }
+
+  const query = `
+    DELETE FROM todos
+    WHERE id=?
+  `;
+
+  await db.all(query, [b.id]);
+
+  return new Response("OK", { status: 200 });
+};
