@@ -45,7 +45,7 @@ export const POST = async (req: NextRequest) => {
 
 export const PATCH = async (req: NextRequest) => {
   const b = await req.json();
-  console.log(b);
+
   if (!db) {
     db = await open({
       filename: "./db/database.db",
@@ -53,13 +53,22 @@ export const PATCH = async (req: NextRequest) => {
     });
   }
 
-  const query = `
-    UPDATE todos
-    SET finished=?
-    WHERE id=?
-  `;
+  if (b.hasOwnProperty("content")) {
+    const query = ` 
+      UPDATE todos
+      SET content=?
+      WHERE id=?
+    `;
 
-  await db.all(query, [b.finished ? "1" : "0", b.id]);
+    await db.all(query, [b.content, b.id]);
+  } else if (b.hasOwnProperty("finished")) {
+    const query = ` UPDATE todos
+      SET finished=?
+      WHERE id=?
+    `;
+
+    await db.all(query, [b.finished ? "1" : "0", b.id]);
+  }
 
   return new Response("OK", { status: 200 });
 };
